@@ -137,3 +137,25 @@ Restart `client.py`, and you're good to go!
 ├── mcp_servers.json         # MCP server connection configuration
 ├── requirements.txt         # Python dependencies
 ```
+
+### If Using the Dremio MCP Server
+
+[The Dremio MCP Server](https://github.com/dremio/dremio-mcp)
+
+Follow the docs to configure the server, and the JSON to configure the client would look like:
+
+```json
+{
+  "dremio": {
+    "transport": "stdio",
+    "command": "uv",
+    "args": [
+      "run",
+      "--directory",
+      "/absolute/path/to/dremio-mcp",  // update with your actual path
+      "dremio-mcp-server",
+      "run"
+    ]
+  }
+}
+```
