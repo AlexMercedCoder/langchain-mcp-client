@@ -1,2 +1,4 @@
 .env
 /venv
+*.scratch
+client2.py

@@ -47,6 +47,7 @@ Create a `.env` file in the root:
 ```env
 OPENAI_API_KEY=your-openai-api-key
 LLM_MODEL=openai:gpt-4.1
+DETAILED_OUTPUT=false #change to true if want full message history object
 ```
 
 ### 4. Define Your MCP Servers

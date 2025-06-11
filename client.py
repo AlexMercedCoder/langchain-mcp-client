@@ -14,6 +14,9 @@ console = Console()
 # Load environment variables from .env file (e.g., API keys, model name)
 load_dotenv()
 
+# Detailed Output Flag
+detailed_output = os.getenv("DETAILED_OUTPUT", "false").lower() == "true"
+
 # === Define the main asynchronous function ===
 async def main():
     # Get environment variables for LLM API key and model
@@ -58,7 +61,16 @@ async def main():
             response = await agent.ainvoke({"messages": user_input})
 
             # Print the response in styled CLI output
-            console.print(f"[cyan]Agent:[/cyan] {response}")
+            if detailed_output:
+                console.print(f"[cyan]Agent (full):[/cyan] {response}")
+            else:
+                # Extract just the last AIMessage content
+                messages = response.get("messages", [])
+                final_message = next((msg.content for msg in reversed(messages) if msg.type == "ai"), None)
+                if final_message:
+                    console.print(f"[cyan]Agent:[/cyan] {final_message}")
+                else:
+                    console.print("[yellow]No final AI response found.[/yellow]")
         except Exception as e:
             # If something goes wrong, print the error message
             console.print(f"[red]Error:[/red] {e}")
