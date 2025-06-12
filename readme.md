@@ -159,3 +159,76 @@ Follow the docs to configure the server, and the JSON to configure the client wo
   }
 }
 ```
+
+[Demo of Using Dremio MCP Server with this Client](https://youtu.be/MFdKrjp5Kv4)
+
+## Using Other Models
+
+You can use any LangChain-compatible LLM. Just set the `LLM_MODEL` environment variable to the model you want to use.
+
+```
+########################################
+# OpenAI (GPT-3.5, GPT-4, GPT-4o)
+########################################
+LLM_MODEL=openai:gpt-4.1
+OPENAI_API_KEY=your-openai-api-key
+
+
+########################################
+# Anthropic (Claude 2, Claude 3 Opus/Sonnet/Haiku)
+########################################
+LLM_MODEL=anthropic:claude-3-opus-20240229
+ANTHROPIC_API_KEY=your-anthropic-api-key
+
+
+########################################
+# Google (Gemini 1.5 Pro via Generative AI)
+########################################
+LLM_MODEL=google:gemini-pro
+GOOGLE_API_KEY=your-google-genai-api-key
+
+
+########################################
+# Mistral (Mistral models hosted on mistral.ai)
+########################################
+LLM_MODEL=mistral:mistral-medium
+MISTRAL_API_KEY=your-mistral-api-key
+
+
+########################################
+# Cohere (Command R+, etc.)
+########################################
+LLM_MODEL=cohere:command-r-plus
+COHERE_API_KEY=your-cohere-api-key
+
+
+########################################
+# Together AI (Proxy for OSS models: Mixtral, Zephyr, LLaMA)
+########################################
+LLM_MODEL=together:mistralai/Mixtral-8x7B-Instruct-v0.1
+TOGETHER_API_KEY=your-together-api-key
+
+
+########################################
+# Fireworks AI (Open-weight and commercial model access)
+########################################
+LLM_MODEL=fireworks:accounts/fireworks/models/llama-v2-13b-chat
+FIREWORKS_API_KEY=your-fireworks-api-key
+
+
+########################################
+# Azure OpenAI (Azure-hosted GPT-4/3.5)
+########################################
+LLM_MODEL=azure:gpt-4
+AZURE_OPENAI_API_KEY=your-azure-api-key
+AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+
+
+########################################
+# AWS Bedrock (Claude, Mistral, LLaMA, Cohere via AWS)
+########################################
+LLM_MODEL=bedrock:anthropic.claude-3-sonnet-20240229-v1:0
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+AWS_REGION=us-east-1
+```

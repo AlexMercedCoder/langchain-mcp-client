@@ -19,17 +19,45 @@ detailed_output = os.getenv("DETAILED_OUTPUT", "false").lower() == "true"
 
 # === Define the main asynchronous function ===
 async def main():
-    # Get environment variables for LLM API key and model
-    openai_api_key = os.getenv("OPENAI_API_KEY")
+    # Get LLM model from environment
     llm_model = os.getenv("LLM_MODEL")
 
-    # If either variable is missing, inform the user and exit
-    if not openai_api_key or not llm_model:
-        console.print("[red]Missing OPENAI_API_KEY or LLM_MODEL in .env[/red]")
+    if not llm_model:
+        console.print("[red]Missing LLM_MODEL in .env[/red]")
         return
 
-    # Make sure the API key is available to LangChain tools (used internally by OpenAI integration)
-    os.environ["OPENAI_API_KEY"] = openai_api_key
+    # Infer model provider from prefix
+    provider_prefix = llm_model.split(":")[0]
+
+    # Mapping of provider prefix to required env vars
+    required_env_vars = {
+        "openai": ["OPENAI_API_KEY"],
+        "anthropic": ["ANTHROPIC_API_KEY"],
+        "google": ["GOOGLE_API_KEY"],
+        "mistral": ["MISTRAL_API_KEY"],
+        "cohere": ["COHERE_API_KEY"],
+        "together": ["TOGETHER_API_KEY"],
+        "fireworks": ["FIREWORKS_API_KEY"],
+        "azure": ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT"],
+        "bedrock": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"]
+    }
+
+    # Check if the provider is supported
+    if provider_prefix not in required_env_vars:
+        console.print(f"[red]Unsupported LLM provider prefix: '{provider_prefix}'[/red]")
+        return
+
+    # Validate that all required environment variables are present
+    missing_vars = [var for var in required_env_vars[provider_prefix] if not os.getenv(var)]
+    if missing_vars:
+        console.print(f"[red]Missing required environment variables for {provider_prefix}: {', '.join(missing_vars)}[/red]")
+        return
+
+    # Optionally set them into os.environ (if using libraries that expect them there)
+    for var in required_env_vars[provider_prefix]:
+        os.environ[var] = os.getenv(var)
+
+    console.print(f"[green]Using model:[/green] {llm_model}")
 
     # Load the list of MCP servers from a local JSON file
     with open("mcp_servers.json", "r") as f:
