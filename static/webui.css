@@ -1,4 +1,4 @@
-/* Root layout styles */
+/* ===== Global Layout ===== */
 body {
     margin: 0;
     padding: 0;
@@ -11,7 +11,7 @@ body {
     height: 100vh;
 }
 
-/* Container for the whole chat UI */
+/* ===== Chat Container ===== */
 .chat-container {
     background-color: #13294b;
     border-radius: 10px;
@@ -24,7 +24,7 @@ body {
     overflow: hidden;
 }
 
-/* Header styles */
+/* ===== Header ===== */
 .chat-header {
     padding: 20px;
     background-color: #1d3b5e;
@@ -44,7 +44,7 @@ body {
     color: #a0b8d8;
 }
 
-/* Chat message area */
+/* ===== Chat Window ===== */
 .chat-window {
     flex-grow: 1;
     padding: 20px;
@@ -52,21 +52,59 @@ body {
     background-color: #0e223f;
 }
 
-.chat-window .message {
+/* ===== Messages ===== */
+.message {
     margin-bottom: 12px;
+    display: flex;
 }
 
-.chat-window .user {
-    text-align: right;
-    color: #7fb7ff;
+.message.user {
+    justify-content: flex-end;
 }
 
-.chat-window .agent {
-    text-align: left;
+.message.agent {
+    justify-content: flex-start;
+}
+
+/* ===== Message Bubbles ===== */
+.bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+    background-color: #3383e4;
+    color: white;
+}
+
+.message.agent .bubble {
+    background-color: #2c3e50;
     color: #ffffff;
 }
 
-/* Chat input form */
+/* ===== Markdown Styling ===== */
+.bubble h1, .bubble h2, .bubble h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.3rem;
+}
+
+.bubble code {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.bubble pre {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+}
+
+/* ===== Chat Input Form ===== */
 .chat-form {
     display: flex;
     padding: 15px;
@@ -86,7 +124,7 @@ body {
 }
 
 .chat-form button {
-    padding: 10px 20px;
+    padding: 10px 16px;
     margin-left: 10px;
     font-size: 1rem;
     background-color: #3383e4;
@@ -99,4 +137,12 @@ body {
 
 .chat-form button:hover {
     background-color: #266dc0;
+}
+
+.chat-form button#reset-chat {
+    background-color: #d14545;
+}
+
+.chat-form button#reset-chat:hover {
+    background-color: #b53b3b;
 }

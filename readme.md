@@ -1,5 +1,25 @@
 # 🧠 Universal MCP Chat Client
 
+## 📚 Table of Contents
+
+- [🧠 Universal MCP Chat Client](#-universal-mcp-chat-client)
+- [📦 Features](#-features)
+- [🚀 Quickstart](#-quickstart)
+  - [1. Clone the Repository](#1-clone-the-repository)
+  - [2. Install Dependencies](#2-install-dependencies)
+  - [3. Configure Your Environment](#3-configure-your-environment)
+  - [4. Define Your MCP Servers](#4-define-your-mcp-servers)
+  - [5. Start Sample MCP Servers](#5-start-sample-mcp-servers)
+  - [6. Run the Chat Client](#6-run-the-chat-client)
+- [🛠 Adding Your Own Tools](#-adding-your-own-tools)
+- [📁 File Structure](#-file-structure)
+- [📡 If Using the Dremio MCP Server](#if-using-the-dremio-mcp-server)
+- [🤖 Using Other Models](#using-other-models)
+- [🧑‍💻 WebUI](#webui)
+  - [Starting the web UI](#starting-the-web-ui)
+  - [Using the Web UI](#using-the-web-ui)
+
+
 This is a chat-based CLI tool that connects to multiple [FastMCP](https://gofastmcp.com) servers and lets you invoke their tools through natural language using [LangChain](https://python.langchain.com/) and [LangGraph](https://www.langgraph.dev/).
 
 Supports:
@@ -232,3 +252,14 @@ AWS_ACCESS_KEY_ID=your-aws-access-key-id
 AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
 AWS_REGION=us-east-1
 ```
+
+## WebUI
+
+#### Starting the web UI
+
+```
+python web_ui.py
+```
+
+#### Using the Web UI
+Open your browser and navigate to http://localhost:5000.

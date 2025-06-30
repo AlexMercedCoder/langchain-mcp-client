@@ -2,3 +2,20 @@
 /venv
 *.scratch
 client2.py
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Session storage
+flask_session/
+
+# macOS metadata
+.DS_Store
+
+# Editor folders
+.vscode/
+.idea/
+
+# Dependency cache
+*.egg-info/
