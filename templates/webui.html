@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Universal MCP Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='webui.css') }}" />
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1>Universal MCP Chat</h1>
+            <p>Created by github.com/alexmercedcoder</p>
+        </header>
+
+        <div id="chat-window" class="chat-window">
+            <!-- Messages will appear here -->
+        </div>
+
+        <form id="chat-form" class="chat-form">
+            <input type="text" id="user-input" placeholder="Type your question..." autocomplete="off" />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='webui.js') }}"></script>
+</body>
+</html>

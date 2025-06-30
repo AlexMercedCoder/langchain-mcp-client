@@ -1,12 +1,16 @@
 # === Import standard and external libraries ===
 
-import json  # Used for reading the MCP server config from a JSON file
-import os  # Used for accessing environment variables
-import asyncio  # Used for running asynchronous code
-from dotenv import load_dotenv  # Loads environment variables from a `.env` file
-from langchain_mcp_adapters.client import MultiServerMCPClient  # MCP client to connect to multiple servers
-from langgraph.prebuilt import create_react_agent  # Helper to build a ReAct agent with LangChain and LangGraph
-from rich.console import Console  # For pretty-printed CLI output
+import json
+import os
+import asyncio
+from dotenv import load_dotenv
+from rich.console import Console
+
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langgraph.prebuilt import create_react_agent
+
+# Import the central environment setup logic
+from env_setup import setup_llm_environment
 
 # Create a Rich console for styled terminal output
 console = Console()
@@ -14,50 +18,18 @@ console = Console()
 # Load environment variables from .env file (e.g., API keys, model name)
 load_dotenv()
 
-# Detailed Output Flag
+# Detailed Output Flag (optional output verbosity)
 detailed_output = os.getenv("DETAILED_OUTPUT", "false").lower() == "true"
 
 # === Define the main asynchronous function ===
 async def main():
-    # Get LLM model from environment
-    llm_model = os.getenv("LLM_MODEL")
-
-    if not llm_model:
-        console.print("[red]Missing LLM_MODEL in .env[/red]")
+    try:
+        # Run validation + provider-specific env var setup
+        llm_model = setup_llm_environment()
+        console.print(f"[green]Using model:[/green] {llm_model}")
+    except ValueError as e:
+        console.print(f"[red]{e}[/red]")
         return
-
-    # Infer model provider from prefix
-    provider_prefix = llm_model.split(":")[0]
-
-    # Mapping of provider prefix to required env vars
-    required_env_vars = {
-        "openai": ["OPENAI_API_KEY"],
-        "anthropic": ["ANTHROPIC_API_KEY"],
-        "google": ["GOOGLE_API_KEY"],
-        "mistral": ["MISTRAL_API_KEY"],
-        "cohere": ["COHERE_API_KEY"],
-        "together": ["TOGETHER_API_KEY"],
-        "fireworks": ["FIREWORKS_API_KEY"],
-        "azure": ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT"],
-        "bedrock": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"]
-    }
-
-    # Check if the provider is supported
-    if provider_prefix not in required_env_vars:
-        console.print(f"[red]Unsupported LLM provider prefix: '{provider_prefix}'[/red]")
-        return
-
-    # Validate that all required environment variables are present
-    missing_vars = [var for var in required_env_vars[provider_prefix] if not os.getenv(var)]
-    if missing_vars:
-        console.print(f"[red]Missing required environment variables for {provider_prefix}: {', '.join(missing_vars)}[/red]")
-        return
-
-    # Optionally set them into os.environ (if using libraries that expect them there)
-    for var in required_env_vars[provider_prefix]:
-        os.environ[var] = os.getenv(var)
-
-    console.print(f"[green]Using model:[/green] {llm_model}")
 
     # Load the list of MCP servers from a local JSON file
     with open("mcp_servers.json", "r") as f:
