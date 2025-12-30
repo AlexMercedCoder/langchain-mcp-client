@@ -19,8 +19,8 @@ A robust Python client for interacting with **Model Context Protocol (MCP)** ser
 ### 1. Installation
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/your-username/mcp-client.git
-cd mcp-client
+git clone https://github.com/AlexMercedCoder/langchain-mcp-client.git
+cd langchain-mcp-client
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
