@@ -35,3 +35,24 @@ def setup_llm_environment():
         os.environ[var] = os.getenv(var)
 
     return llm_model
+
+import re
+
+def substitute_env_vars(data):
+    """Recursively replace ${VAR_NAME} in strings with environment variables."""
+    if isinstance(data, dict):
+        return {k: substitute_env_vars(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [substitute_env_vars(i) for i in data]
+    elif isinstance(data, str):
+        # Regex to find ${VAR_NAME}
+        pattern = re.compile(r'\$\{([^}]+)\}')
+        def replacer(match):
+            var_name = match.group(1)
+            val = os.getenv(var_name)
+            if val is None:
+                return f"${{{var_name}}}"
+            return val
+        return pattern.sub(replacer, data)
+    else:
+        return data

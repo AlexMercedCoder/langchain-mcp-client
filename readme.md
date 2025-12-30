@@ -1,265 +1,175 @@
-# 🧠 Universal MCP Chat Client
+# Universal MCP Chat Client
 
-## 📚 Table of Contents
+A robust Python client for interacting with **Model Context Protocol (MCP)** servers. Built with **LangChain** and **LangGraph**, it enables you to chat with multiple MCP servers simultaneously using a natural language interface on the CLI or a Web UI.
 
-- [🧠 Universal MCP Chat Client](#-universal-mcp-chat-client)
-- [📦 Features](#-features)
-- [🚀 Quickstart](#-quickstart)
-  - [1. Clone the Repository](#1-clone-the-repository)
-  - [2. Install Dependencies](#2-install-dependencies)
-  - [3. Configure Your Environment](#3-configure-your-environment)
-  - [4. Define Your MCP Servers](#4-define-your-mcp-servers)
-  - [5. Start Sample MCP Servers](#5-start-sample-mcp-servers)
-  - [6. Run the Chat Client](#6-run-the-chat-client)
-- [🛠 Adding Your Own Tools](#-adding-your-own-tools)
-- [📁 File Structure](#-file-structure)
-- [📡 If Using the Dremio MCP Server](#if-using-the-dremio-mcp-server)
-- [🤖 Using Other Models](#using-other-models)
-- [🧑‍💻 WebUI](#webui)
-  - [Starting the web UI](#starting-the-web-ui)
-  - [Using the Web UI](#using-the-web-ui)
+![Universal MCP Client](https://github.com/user-attachments/assets/placeholder)
 
-
-This is a chat-based CLI tool that connects to multiple [FastMCP](https://gofastmcp.com) servers and lets you invoke their tools through natural language using [LangChain](https://python.langchain.com/) and [LangGraph](https://www.langgraph.dev/).
-
-Supports:
-- ✅ Environment-based credentials and model config
-- ✅ JSON-based multi-server configuration
-- ✅ Chat loop using any LangChain-compatible LLM
-- ✅ Easily pluggable FastMCP tool servers
+## Features
+-   **Multi-Server Support**: Connect to unlimited MCP servers (local processes or remote HTTP/SSE).
+-   **Secure Authentication**: Securely inject API keys and OAuth tokens via Environment Variables (`${VAR}`).
+-   **Streaming Responses**: Real-time token-by-token generation in the CLI.
+-   **Customizable Agent**: Configure the System Prompt and LLM Provider via `.env`.
+-   **Web Interface**: Optional Flask-based UI for browser interaction.
+-   **Dremio Integration**: Native helper script for Dremio OAuth flow.
 
 ---
 
-## 📦 Features
+## Quickstart
 
-- Connects to multiple MCP tool servers via `stdio` or `streamable-http`
-- Uses LangChain's ReAct agent to interpret prompts and choose tools
-- Loads credentials and model via `.env`
-- Runs in a simple terminal environment with rich CLI display
-
----
-
-## 🚀 Quickstart
-
-### 1. Clone the Repository
-
+### 1. Installation
+Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/AlexMercedCoder/langchain-mcp-client
-cd langchain-mcp-client
-```
-
-### 2. Install Dependencies
-We recommend using a virtual environment.
-
-```bash
+git clone https://github.com/your-username/mcp-client.git
+cd mcp-client
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Or manually:
-
+### 2. Environment Setup
+Create a `.env` file from the example:
 ```bash
-pip install python-dotenv langchain langgraph langchain-mcp-adapters fastmcp openai rich langchain-openai
+cp .env.example .env
 ```
-
-### 3. Configure Your Environment
-Create a `.env` file in the root:
-
+Edit `.env` to add your LLM API Key (e.g., OpenAI):
 ```env
-OPENAI_API_KEY=your-openai-api-key
-LLM_MODEL=openai:gpt-4.1
-DETAILED_OUTPUT=false #change to true if want full message history object
+OPENAI_API_KEY=sk-...
+LLM_MODEL=openai:gpt-4o
+SYSTEM_PROMPT="You are a helpful assistant."
 ```
 
-### 4. Define Your MCP Servers
-Edit the `mcp_servers.json` file:
-
-```json
-{
-  "math": {
-    "command": "python",
-    "args": ["./mcp_servers/math_server.py"],
-    "transport": "stdio"
-  },
-  "weather": {
-    "url": "http://localhost:8000/mcp/",
-    "transport": "streamable_http"
-  }
-}
-```
-You can point to any local or remote MCP server using:
-
-stdio (for local processes)
-
-streamable_http (for web APIs)
-
-### 5. Start Sample MCP Servers
-In one terminal, start the weather server:
-
-```bash
-python weather_server.py
-```
-
-In another terminal, start the math server:
-
-```bash
-python math_server.py
-```
-
-### 6. Run the Chat Client
-
+### 3. Run the Client
+Start the interactive CLI:
 ```bash
 python client.py
 ```
 
-You’ll be dropped into a chat loop. Try asking:
+---
 
-```python-repl
->>> what is (3 + 5) x 12?
->>> what's the weather in Paris?
-```
+## Configuration Scenarios
 
-### 🛠 Adding Your Own Tools
-Create a new FastMCP server, e.g. `mcp_servers/my_tools_server.py`:
+Define your servers in `mcp_servers.json`.
 
-```python
-from fastmcp import FastMCP
-
-mcp = FastMCP("MyTools")
-
-@mcp.tool
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
-
-if __name__ == "__main__":
-    mcp.run(transport="stdio")
-```
-
-Add it to mcp_servers.json:
-
-```json
-"mytools": {
-  "command": "python",
-  "args": ["./my_tools_server.py"],
-  "transport": "stdio"
-}
-```
-
-Restart `client.py`, and you're good to go!
-
-### 📁 File Structure
-```graphql
-.
-├── .env                     # Your API key and model configuration
-├── client.py                # Main CLI application
-├── mcp_servers/             # Folder containing sample MCP server implementations
-│   ├── math_server.py       # Stdio server with math tools
-│   └── weather_server.py    # HTTP server with weather tools
-├── mcp_servers.json         # MCP server connection configuration
-├── requirements.txt         # Python dependencies
-```
-
-### If Using the Dremio MCP Server
-
-[The Dremio MCP Server](https://github.com/dremio/dremio-mcp)
-
-Follow the docs to configure the server, and the JSON to configure the client would look like:
+### Scenario 1: Local Tools (Python/Node/Binaries)
+Connect to local processes using the `stdio` transport. Ideal for secure, local-only tools like filesystem access or SQLite interaction.
 
 ```json
 {
-  "dremio": {
-    "transport": "stdio",
-    "command": "uv",
-    "args": [
-      "run",
-      "--directory",
-      "/absolute/path/to/dremio-mcp",  // update with your actual path
-      "dremio-mcp-server",
-      "run"
-    ]
+  "filesystem": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/files"],
+    "transport": "stdio"
+  },
+  "sqlite": {
+    "command": "uvx",
+    "args": ["mcp-server-sqlite", "--db-path", "./my.db"],
+    "transport": "stdio"
   }
 }
 ```
 
-[Demo of Using Dremio MCP Server with this Client](https://youtu.be/MFdKrjp5Kv4)
+### Scenario 2: Remote / Public Servers
+Connect to public MCP servers via HTTP.
 
-## Using Other Models
-
-You can use any LangChain-compatible LLM. Just set the `LLM_MODEL` environment variable to the model you want to use.
-
-```
-########################################
-# OpenAI (GPT-3.5, GPT-4, GPT-4o)
-########################################
-LLM_MODEL=openai:gpt-4.1
-OPENAI_API_KEY=your-openai-api-key
-
-
-########################################
-# Anthropic (Claude 2, Claude 3 Opus/Sonnet/Haiku)
-########################################
-LLM_MODEL=anthropic:claude-3-opus-20240229
-ANTHROPIC_API_KEY=your-anthropic-api-key
-
-
-########################################
-# Google (Gemini 1.5 Pro via Generative AI)
-########################################
-LLM_MODEL=google:gemini-pro
-GOOGLE_API_KEY=your-google-genai-api-key
-
-
-########################################
-# Mistral (Mistral models hosted on mistral.ai)
-########################################
-LLM_MODEL=mistral:mistral-medium
-MISTRAL_API_KEY=your-mistral-api-key
-
-
-########################################
-# Cohere (Command R+, etc.)
-########################################
-LLM_MODEL=cohere:command-r-plus
-COHERE_API_KEY=your-cohere-api-key
-
-
-########################################
-# Together AI (Proxy for OSS models: Mixtral, Zephyr, LLaMA)
-########################################
-LLM_MODEL=together:mistralai/Mixtral-8x7B-Instruct-v0.1
-TOGETHER_API_KEY=your-together-api-key
-
-
-########################################
-# Fireworks AI (Open-weight and commercial model access)
-########################################
-LLM_MODEL=fireworks:accounts/fireworks/models/llama-v2-13b-chat
-FIREWORKS_API_KEY=your-fireworks-api-key
-
-
-########################################
-# Azure OpenAI (Azure-hosted GPT-4/3.5)
-########################################
-LLM_MODEL=azure:gpt-4
-AZURE_OPENAI_API_KEY=your-azure-api-key
-AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
-
-
-########################################
-# AWS Bedrock (Claude, Mistral, LLaMA, Cohere via AWS)
-########################################
-LLM_MODEL=bedrock:anthropic.claude-3-sonnet-20240229-v1:0
-AWS_ACCESS_KEY_ID=your-aws-access-key-id
-AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
-AWS_REGION=us-east-1
+```json
+{
+  "weather": {
+    "url": "https://weather-mcp.example.com",
+    "transport": "streamable_http"
+  }
+}
 ```
 
-## WebUI
+### Scenario 3: Secure / Authenticated Servers
+**Never commit secrets to `mcp_servers.json`.**
+Instead, use the `${VAR_NAME}` syntax. The client will automatically substitute these with values from your `.env` file at runtime.
 
-#### Starting the web UI
-
+**In `.env`:**
+```env
+MY_OAUTH_TOKEN=secret-123
 ```
-python web_ui.py
+
+**In `mcp_servers.json`:**
+```json
+{
+  "secure-api": {
+    "url": "https://api.example.com/mcp",
+    "transport": "streamable_http",
+    "headers": {
+      "Authorization": "Bearer ${MY_OAUTH_TOKEN}"
+    }
+  }
+}
 ```
 
-#### Using the Web UI
-Open your browser and navigate to http://localhost:5000.
+### Scenario 4: Dremio Integration (OAuth 2.0)
+To query Dremio Data Catalogs, you must authenticate via OAuth.
+
+1.  **Create App**: In Dremio, register a "Native" OAuth App with Redirect URI:
+    `http://localhost:8000/callback`
+2.  **Configure `.env`**:
+    ```env
+    DREMIO_CLIENT_ID=your-client-id
+    ```
+3.  **Get Token**: Run the helper script:
+    ```bash
+    python auth_dremio.py
+    ```
+    Login via the browser link provided.
+4.  **Save Token**: Copy the resulting token to `.env`:
+    ```env
+    DREMIO_TOKEN=eyJhbGci...
+    ```
+5.  **Configure Server**:
+    ```json
+    "dremio": {
+      "url": "https://mcp.dremio.cloud/mcp/<PROJECT_ID>",
+      "transport": "streamable_http",
+      "headers": {
+        "Authorization": "Bearer ${DREMIO_TOKEN}"
+      }
+    }
+    ```
+
+---
+
+## Advanced Features
+
+### System Prompts
+Customize the agent's personality or rules by setting `SYSTEM_PROMPT` in `.env`.
+```env
+SYSTEM_PROMPT="You are a SQL expert. Always check schemas before querying."
+```
+
+### Web Interface
+Prefer a browser UI?
+```bash
+python webui.py
+```
+Open `http://localhost:5000` to chat.
+
+### Switching LLM Providers
+The client uses LangChain, so it supports OpenAI, Anthropic, Google Vertex, etc.
+Change `LLM_MODEL` in `.env`:
+- `openai:gpt-4o`
+- `anthropic:claude-3-sonnet` (requires `ANTHROPIC_API_KEY`)
+- `google:gemini-pro` (requires `GOOGLE_API_KEY`)
+
+---
+
+## Development
+
+### Upgrade Dependencies
+Keep the core libraries up to date:
+```bash
+pip install --upgrade -r requirements.txt
+```
+
+### Verification
+Run tests to ensure environment substitution and agent creation are working:
+```bash
+python verify_changes.py
+```
+
+## License
+MIT

@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from rich.console import Console
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.prebuilt import create_react_agent
-from env_setup import setup_llm_environment
+from langchain.agents import create_agent
+from env_setup import setup_llm_environment, substitute_env_vars
 
 # Load environment variables
 load_dotenv()
@@ -46,9 +46,14 @@ def chat():
             llm_model = setup_llm_environment()
             with open("mcp_servers.json", "r") as f:
                 server_config = json.load(f)
+            # Substitute env vars
+            server_config = substitute_env_vars(server_config)
+            
             client = MultiServerMCPClient(server_config)
             tools = asyncio.run(client.get_tools())
-            agent_cache["agent"] = create_react_agent(llm_model, tools)
+            
+            system_prompt = os.getenv("SYSTEM_PROMPT")
+            agent_cache["agent"] = create_agent(llm_model, tools, system_prompt=system_prompt)
 
         agent = agent_cache["agent"]
 

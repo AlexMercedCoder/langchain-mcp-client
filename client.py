@@ -3,14 +3,15 @@
 import json
 import os
 import asyncio
+import re
 from dotenv import load_dotenv
 from rich.console import Console
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 
 # Import the central environment setup logic
-from env_setup import setup_llm_environment
+from env_setup import setup_llm_environment, substitute_env_vars
 
 # Create a Rich console for styled terminal output
 console = Console()
@@ -20,6 +21,8 @@ load_dotenv()
 
 # Detailed Output Flag (optional output verbosity)
 detailed_output = os.getenv("DETAILED_OUTPUT", "false").lower() == "true"
+
+
 
 # === Define the main asynchronous function ===
 async def main():
@@ -35,6 +38,9 @@ async def main():
     with open("mcp_servers.json", "r") as f:
         server_config = json.load(f)
 
+    # Substitute environment variables in the server config
+    server_config = substitute_env_vars(server_config)
+
     # Create a MultiServer MCP client using the server definitions from the JSON
     client = MultiServerMCPClient(server_config)
 
@@ -42,7 +48,9 @@ async def main():
     tools = await client.get_tools()
 
     # Create a LangChain + LangGraph ReAct-style agent with the given model and tools
-    agent = create_react_agent(llm_model, tools)
+    system_prompt = os.getenv("SYSTEM_PROMPT")
+    # Note: create_agent uses 'system_prompt'
+    agent = create_agent(llm_model, tools, system_prompt=system_prompt)
 
     # Inform the user they can start chatting
     console.print("[bold green]Connected to MCP servers. Start chatting! Type 'exit' to quit.[/bold green]")
@@ -58,19 +66,19 @@ async def main():
 
         try:
             # Send the user's input to the agent for processing
-            response = await agent.ainvoke({"messages": user_input})
-
-            # Print the response in styled CLI output
             if detailed_output:
+                # In detailed mode, we just await the full response
+                response = await agent.ainvoke({"messages": user_input})
                 console.print(f"[cyan]Agent (full):[/cyan] {response}")
             else:
-                # Extract just the last AIMessage content
-                messages = response.get("messages", [])
-                final_message = next((msg.content for msg in reversed(messages) if msg.type == "ai"), None)
-                if final_message:
-                    console.print(f"[cyan]Agent:[/cyan] {final_message}")
-                else:
-                    console.print("[yellow]No final AI response found.[/yellow]")
+                # Streaming Output
+                console.print("[cyan]Agent:[/cyan] ", end="")
+                async for event in agent.astream_events({"messages": user_input}, version="v2"):
+                    if event["event"] == "on_chat_model_stream":
+                        content = event["data"]["chunk"].content
+                        if content:
+                            console.print(content, end="")
+                console.print() # Newline at the end
         except Exception as e:
             # If something goes wrong, print the error message
             console.print(f"[red]Error:[/red] {e}")
